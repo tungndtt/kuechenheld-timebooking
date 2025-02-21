@@ -1,6 +1,6 @@
 
 import { Entity, Index, Column, PrimaryGeneratedColumn } from 'typeorm';
-import { Duration } from './interfaces';
+import { Duration } from '@/interfaces';
 
 @Entity('time_block')
 @Index(['staffId', 'date'])

@@ -1,8 +1,8 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { TimeBlock } from '../entities';
-import { Duration } from '../interfaces';
+import { TimeBlock } from '@/entities';
+import { Duration } from '@/interfaces';
 
 @Injectable()
 export class UserService {

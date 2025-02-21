@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { Staff } from '../interfaces';
+import { Staff } from '@/interfaces';
 
 @Injectable()
 export class StaffService {

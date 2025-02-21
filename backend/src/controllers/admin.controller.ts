@@ -1,10 +1,10 @@
 import { Controller, Get, Post, Query, Body, Res, Sse } from '@nestjs/common';
 import { Response } from 'express';
-import { AdminService } from '../services/admin.service';
-import { PubsubService } from '../services/pubsub.service';
+import { AdminService } from '@/services/admin.service';
+import { PubsubService } from '@/services/pubsub.service';
 import { Observable, fromEventPattern } from 'rxjs';
 import { plainToInstance } from 'class-transformer';
-import { TimeBlockDto, AddTimeBlockDto } from '../dtos';
+import { TimeBlockDto, AddTimeBlockDto } from '@/dtos';
 
 @Controller('admins')
 export class AdminController {

@@ -1,10 +1,10 @@
 import { Controller, Get, Post, Sse, Query, Body, Res } from '@nestjs/common';
 import { Response } from 'express';
-import { UserService } from '../services/user.service';
-import { PubsubService } from '../services/pubsub.service';
+import { UserService } from '@/services/user.service';
+import { PubsubService } from '@/services/pubsub.service';
 import { Observable, fromEventPattern } from 'rxjs';
 import { plainToInstance } from 'class-transformer';
-import { BookAppointmentDto, TimeBlockDto } from '../dtos';
+import { BookAppointmentDto, TimeBlockDto } from '@/dtos';
 
 @Controller('users')
 export class UserController {

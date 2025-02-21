@@ -1,6 +1,6 @@
 import { Controller, Get, Query, ParseArrayPipe } from '@nestjs/common';
-import { StaffService } from '../services/staff.service';
-import { Staff } from 'src/interfaces';
+import { StaffService } from '@/services/staff.service';
+import { Staff } from '@/interfaces';
 
 @Controller('staffs')
 export class StaffController {
