@@ -17,6 +17,6 @@ export class TimeBlock {
     @Column({type: 'json'})
     duration: Duration;
 
-    @Column({type: 'json', default: []})
+    @Column({type: 'json'})
     appointments: Duration[];
 }

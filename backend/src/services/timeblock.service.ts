@@ -25,7 +25,10 @@ export class TimeBlockService {
         return this.dataSource.transaction<TimeBlock>(async (manager) => {
             await manager.query('LOCK TABLES timeblock WRITE');
             try {
-                const timeBlocks = await this.getTimeBlocks(date, staffId);
+                const timeBlocks = await manager.query<TimeBlock[]>(
+                    'SELECT * FROM timeblock WHERE staffId = ? AND date = ?',
+                    [staffId, date]
+                );
                 // check overlapping
                 for(let {duration: timeBlockDuration} of timeBlocks) {
                     if(
@@ -35,7 +38,7 @@ export class TimeBlockService {
                         return null;
                     }
                 }
-                const timeBlock = manager.create(TimeBlock, { staffId, date, duration });
+                const timeBlock = manager.create(TimeBlock, { staffId, date, duration, appointments: [] });
                 return await manager.save(timeBlock);
             } finally {
                 await manager.query('UNLOCK TABLES');

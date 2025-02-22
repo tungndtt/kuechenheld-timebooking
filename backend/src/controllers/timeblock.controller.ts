@@ -33,7 +33,7 @@ export class TimeBlockController {
     @Post()
     async addTimeBlock(@Body() body: AddTimeBlockDto, @Res() response: Response) {
         const { staffId, date, duration } = body;
-        const timeBlock = await this.timeBlockService.addTimeBlock(staffId, date, duration );
+        const timeBlock = await this.timeBlockService.addTimeBlock(staffId, date, duration);
         if (!timeBlock) {
             return response.status(409).send();
         }
@@ -58,19 +58,27 @@ export class TimeBlockController {
         return response.status(204).send();
     }
 
-    @Sse('sse/user')
-    sseUser(): Observable<MessageEvent> {
+    @Sse('sse/:channel')
+    sse(@Param('channel') channel: string): Observable<MessageEvent> {
+        let listener: ((chan: string, msg: string) => void) | null = null;
         return fromEventPattern(
-            (handler) => this.pubsubService.subscribe('user', handler),
-            () => console.log('SSE connection closed'),
-        );
-    }
-
-    @Sse('sse/admin')
-    sseAdmin(): Observable<MessageEvent> {
-        return fromEventPattern(
-            (handler) => this.pubsubService.subscribe('admin', handler),
-            () => console.log('SSE connection closed'),
+            (handler) => {
+                listener = (chan, msg) => {
+                    if (channel === chan) {
+                        handler({
+                            data: JSON.parse(msg),
+                            type: 'message',
+                        });
+                    }
+                };
+                this.pubsubService.subscribe(channel);
+                this.pubsubService.addListener(listener);
+            },
+            () => {
+                if (listener) {
+                    this.pubsubService.removeListener(listener);
+                }
+            }
         );
     }
 }

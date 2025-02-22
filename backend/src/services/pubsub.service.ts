@@ -19,14 +19,18 @@ export class PubsubService implements OnModuleInit, OnModuleDestroy {
         await this.publisher.publish(channel, JSON.stringify(data));
     }
 
-    async subscribe(channel: string, callback: (data: any) => void) {
+    async subscribe(channel: string) {
         this.subscriber.subscribe(channel);
-        this.subscriber.on('message', (chan, msg) => {
-            if (channel === chan) {
-                callback(JSON.parse(msg));
-            }
-        });
     }
+    
+    addListener(listener: (channel: string, message: string) => void) {
+        this.subscriber.on('message', listener);
+    }
+    
+    removeListener(listener: (channel: string, message: string) => void) {
+        this.subscriber.off('message', listener);
+    }
+    
 
     async onModuleDestroy() {
         this.publisher.quit();
@@ -34,6 +38,6 @@ export class PubsubService implements OnModuleInit, OnModuleDestroy {
     }
 
     async onModuleInit() {
-        console.log('Redis Pub/Sub Service Initialized');
+        console.log('Redis Pubsub Service Initialized');
     }
 }
