@@ -1,3 +1,4 @@
+"use client";
 import { memo, useState, useCallback, useMemo } from "react";
 import { useNotificationContext } from "../context/notification";
 import { useTimeBlockContext } from "@/app/context/timeblock";
@@ -114,18 +115,15 @@ export default function UserPage() {
                     ))}
                 </Select>
             </FormControl>
-            {timeBlocks
-                .entries()
-                .toArray()
-                .map(([staffId, staffTimeBlocks]) => (
-                    <StaffTimeBlocks
-                        key={staffId}
-                        name={staffs.get(staffId) ?? "unknown"}
-                        timeBlocks={staffTimeBlocks}
-                        duration={duration}
-                        onBooking={onBooking}
-                    />
-                ))}
+            {[...timeBlocks.entries()].map(([staffId, staffTimeBlocks]) => (
+                <StaffTimeBlocks
+                    key={staffId}
+                    name={staffs.get(staffId) ?? "unknown"}
+                    timeBlocks={staffTimeBlocks}
+                    duration={duration}
+                    onBooking={onBooking}
+                />
+            ))}
             <Modal open={bookingOpen} onClose={() => setBookingOpen(false)} aria-labelledby="modal-title">
                 <Box>
                     <Typography id="modal-title" variant="h6" component="h2">

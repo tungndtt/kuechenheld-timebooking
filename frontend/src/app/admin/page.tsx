@@ -1,12 +1,27 @@
-import { useState, useEffect, memo, useMemo } from "react";
+"use client";
+import { useState, memo, useMemo } from "react";
+import { useNotificationContext } from "@/app/context/notification";
 import { useTimeBlockContext } from "@/app/context/timeblock";
 import { useStaffContext } from "@/app/context/staff";
-import { Box, Button, Card, CardContent, Chip, FormControl, InputLabel, MenuItem, Select, Typography } from "@mui/material";
+import {
+    Box,
+    Button,
+    Card,
+    CardContent,
+    Chip,
+    Divider,
+    FormControl,
+    InputLabel,
+    MenuItem,
+    Select,
+    Typography,
+} from "@mui/material";
 import { DatePicker, TimeField } from "@mui/x-date-pickers";
-import { TimeBlock, Duration } from "@/app/types";
+import ErrorIcon from "@mui/icons-material/Error";
+import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import dayjs, { Dayjs } from "dayjs";
-import { SERVER_URL } from "../config";
-import { useNotificationContext } from "../context/notification";
+import { TimeBlock, Duration } from "@/app/types";
+import { SERVER_URL } from "@/app/config";
 
 export default function AdminPage() {
     const notify = useNotificationContext();
@@ -18,7 +33,7 @@ export default function AdminPage() {
         endHour: 17,
         endMinute: 0,
     });
-    const [staffId, setStaffId] = useState<number | null>(null);
+    const [staffId, setStaffId] = useState<number>(-1);
     const isValidTimeBlock = useMemo(
         () =>
             (timeBlockDuration.endHour - timeBlockDuration.startHour) * 60 +
@@ -39,7 +54,10 @@ export default function AdminPage() {
     };
 
     const addTimeBlock = () => {
-        if (!staffId || !date) return;
+        if (staffId === -1 || !date) {
+            console.log(staffId, date);
+            return;
+        }
         fetch(`${SERVER_URL}/timeblocks`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
@@ -56,55 +74,79 @@ export default function AdminPage() {
     };
 
     return (
-        <Box>
-            <DatePicker label="Appointment Date" value={date} onChange={(date) => setDate(date)} />
-            <FormControl fullWidth size="small">
-                <InputLabel id="staff-select-label">Staff</InputLabel>
-                <Select
-                    labelId="staff-select-label"
-                    id="staff-select"
-                    value={staffId}
-                    label="Staff"
-                    onChange={(e) => setStaffId(e.target.value as number)}
-                >
-                    {staffs
-                        .entries()
-                        .toArray()
-                        .map(([staffId, name]) => (
+        <Box sx={{ display: "flex", flexDirection: "column", gap: 2, m: "20px 10px" }}>
+            <DatePicker
+                label="Appointment Date"
+                value={date}
+                onChange={(date) => setDate(date)}
+                slotProps={{
+                    textField: {
+                        size: "small",
+                    },
+                }}
+            />
+            <Box
+                sx={{
+                    width: "fit-content",
+                    display: "flex",
+                    flexDirection: "row",
+                    alignItems: "center",
+                    justifyContent: "space-between",
+                    gap: 1,
+                }}
+            >
+                <FormControl size="small">
+                    <InputLabel id="staff-select-label">Staff</InputLabel>
+                    <Select
+                        labelId="staff-select-label"
+                        id="staff-select"
+                        value={staffId}
+                        label="Staff"
+                        onChange={(e) => setStaffId(e.target.value as number)}
+                    >
+                        <MenuItem value={-1} disabled>
+                            No selection
+                        </MenuItem>
+                        {[...staffs.entries()].map(([staffId, name]) => (
                             <MenuItem key={staffId} value={staffId}>
                                 {name}
                             </MenuItem>
                         ))}
-                </Select>
-            </FormControl>
-            <TimeField
-                label="Start time"
-                value={dayjs(`${timeBlockDuration.startHour}:${timeBlockDuration.startMinute}`, "HH:mm")}
-                format="HH:mm"
-                onChange={(value) => changeBlockTime("start", value)}
-            />
-            <TimeField
-                label="End time"
-                value={dayjs(`${timeBlockDuration.endHour}:${timeBlockDuration.endMinute}`, "HH:mm")}
-                format="HH:mm"
-                onChange={(value) => changeBlockTime("end", value)}
-            />
-            {staffId && isValidTimeBlock && (
-                <Card>
-                    <CardContent>
-                        <Typography>Invalid schedule timeblock</Typography>
-                    </CardContent>
-                </Card>
-            )}
-            <Button size="small" variant="outlined" disabled={!isValidTimeBlock || !staffId} onClick={addTimeBlock}>
-                Schedule timeblock
-            </Button>
-            {timeBlocks
-                .entries()
-                .toArray()
-                .map(([staffId, staffTimeBlocks]) => (
-                    <StaffTimeBlocks key={staffId} name={staffs.get(staffId) ?? "unknown"} timeBlocks={staffTimeBlocks} />
-                ))}
+                    </Select>
+                </FormControl>
+                <TimeField
+                    label="Start time"
+                    value={dayjs(`${timeBlockDuration.startHour}:${timeBlockDuration.startMinute}`, "HH:mm")}
+                    format="HH:mm"
+                    onChange={(value) => changeBlockTime("start", value)}
+                    slotProps={{
+                        textField: {
+                            size: "small",
+                        },
+                    }}
+                />
+                <TimeField
+                    label="End time"
+                    value={dayjs(`${timeBlockDuration.endHour}:${timeBlockDuration.endMinute}`, "HH:mm")}
+                    format="HH:mm"
+                    onChange={(value) => changeBlockTime("end", value)}
+                    slotProps={{
+                        textField: {
+                            size: "small",
+                        },
+                    }}
+                />
+                {staffId === -1 || !isValidTimeBlock ? <ErrorIcon color="error" /> : <CheckCircleIcon color="success" />}
+                <Button size="medium" variant="outlined" disabled={!isValidTimeBlock || staffId === -1} onClick={addTimeBlock}>
+                    Add timeblock
+                </Button>
+            </Box>
+            <Divider>
+                <Chip label="Time Blocks" size="small" />
+            </Divider>
+            {[...timeBlocks.entries()].map(([staffId, staffTimeBlocks]) => (
+                <StaffTimeBlocks key={staffId} name={staffs.get(staffId) ?? "unknown"} timeBlocks={staffTimeBlocks} />
+            ))}
         </Box>
     );
 }

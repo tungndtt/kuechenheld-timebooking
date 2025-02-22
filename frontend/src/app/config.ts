@@ -1,1 +1,1 @@
-export const SERVER_URL = process.env.REACT_APP_SERVER_URL || "localhost:2204";
+export const SERVER_URL = process.env.NEXT_PUBLIC_SERVER_URL;
