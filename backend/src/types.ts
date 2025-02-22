@@ -1,9 +1,9 @@
-export interface Staff {
+export type Staff = {
     id: number;
     name: string;
 }
 
-export interface Duration {
+export type Duration = {
     startHour: number;
     startMinute: number;
     endHour: number;

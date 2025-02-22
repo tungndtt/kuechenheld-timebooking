@@ -1,6 +1,6 @@
 import { Controller, Get, Query, ParseArrayPipe } from '@nestjs/common';
 import { StaffService } from '@/services/staff.service';
-import { Staff } from '@/interfaces';
+import { Staff } from '@/types';
 
 @Controller('staffs')
 export class StaffController {
@@ -8,7 +8,7 @@ export class StaffController {
 
     @Get()
     getStaffs(
-        @Query('ids', new ParseArrayPipe({ items: Number, separator: ',', optional: true })) ids: number[]
+        @Query('ids', new ParseArrayPipe({ items: Number, separator: ',', optional: true })) ids?: number[]
     ): Staff[] {
         return this.staffService.getStaffs(ids);
     }

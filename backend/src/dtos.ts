@@ -1,6 +1,6 @@
-import { IsInt, IsObject, IsArray, IsOptional, IsISO8601 } from 'class-validator';
+import { IsInt, IsObject, IsArray, IsISO8601 } from 'class-validator';
 
-class Duration {
+export class Duration {
     @IsInt()
     startHour: number;
 
@@ -12,14 +12,6 @@ class Duration {
 
     @IsInt()
     endMinute: number;
-}
-
-export class BookAppointmentDto {
-    @IsInt()
-    id: number;
-
-    @IsInt()
-    duration: Duration;
 }
 
 export class AddTimeBlockDto {
@@ -47,6 +39,5 @@ export class TimeBlockDto {
     duration: Duration;
 
     @IsArray()
-    @IsOptional()
     appointments: Duration[];
 }
