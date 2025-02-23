@@ -10,7 +10,6 @@ export class PubsubService implements OnModuleInit, OnModuleDestroy {
     constructor(readonly configService: ConfigService) {
         const redisHost = configService.get<string>('REDIS_HOST', 'localhost');
         const redisPort = configService.get<number>('REDIS_PORT', 6379);
-
         this.publisher = new Redis({ host: redisHost, port: redisPort });
         this.subscriber = new Redis({ host: redisHost, port: redisPort });
     }
@@ -37,7 +36,5 @@ export class PubsubService implements OnModuleInit, OnModuleDestroy {
         this.subscriber.quit();
     }
 
-    async onModuleInit() {
-        console.log('Redis Pubsub Service Initialized');
-    }
+    async onModuleInit() {}
 }
