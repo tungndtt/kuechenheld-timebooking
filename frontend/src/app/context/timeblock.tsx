@@ -20,24 +20,28 @@ const TimeBlockContext = createContext<TimeBlockContextType>({
 
 export default function TimeBlockProvider(props: { children: ReactNode }) {
     const notify = useNotificationContext();
-    const eventListener = useRef<EventSource | null>(null);
+    const eventSource = useRef<EventSource | null>(null);
+    const eventListener = useRef<(this: EventSource, ev: MessageEvent) => any | null>(null);
     const pathname = usePathname();
     const [date, setDate] = useState<Dayjs | null>(dayjs());
     const [timeBlocks, setTimeBlocks] = useState<Map<number, TimeBlock[]>>(new Map<number, TimeBlock[]>());
 
     const close = () => {
-        if (eventListener.current) {
-            eventListener.current.close();
-            eventListener.current = null;
+        if (eventSource.current) {
+            eventSource.current.close();
+            eventSource.current = null;
         }
     };
 
     const connect = () => {
         if (!["/user", "/admin"].includes(pathname)) return;
-        if (!eventListener.current) {
-            eventListener.current = new EventSource(`${SERVER_URL}/timeblocks/sse${pathname}`);
+        if (!eventSource.current) {
+            eventSource.current = new EventSource(`${SERVER_URL}/timeblocks/sse${pathname}`);
         }
-        eventListener.current.onerror = function (_) {
+        if (eventListener.current) {
+            eventSource.current.onmessage = eventListener.current;
+        }
+        eventSource.current.onerror = function (_) {
             close();
             connect();
         };
@@ -70,8 +74,8 @@ export default function TimeBlockProvider(props: { children: ReactNode }) {
                 }
             })
             .catch(() => notify({ message: "Cannot fetch the time blocks", isError: true }));
-        if (eventListener.current) {
-            eventListener.current.onmessage = function (event) {
+        if (eventSource.current) {
+            eventListener.current = function (event) {
                 const data = JSON.parse(event.data);
                 const { id, staffId, date } = data;
                 if (date !== iso8601Date) return;
@@ -88,7 +92,8 @@ export default function TimeBlockProvider(props: { children: ReactNode }) {
                                     if (index !== -1) {
                                         staffTimeBlocks[index] = timeBlock;
                                     } else {
-                                        for (let i = 0; i < staffTimeBlocks.length; i++) {
+                                        let i = 0;
+                                        for (i = 0; i < staffTimeBlocks.length; i++) {
                                             const staffTimeBlock = staffTimeBlocks[i];
                                             const timeDiff =
                                                 (staffTimeBlock.duration.startHour - timeBlock.duration.startHour) * 60 +
@@ -99,6 +104,9 @@ export default function TimeBlockProvider(props: { children: ReactNode }) {
                                             } else if (timeDiff === 0) {
                                                 return timeBlocks;
                                             }
+                                        }
+                                        if (i === staffTimeBlocks.length) {
+                                            staffTimeBlocks.push(timeBlock);
                                         }
                                     }
                                     staffTimeBlocks = [...staffTimeBlocks];
@@ -112,6 +120,7 @@ export default function TimeBlockProvider(props: { children: ReactNode }) {
                     })
                     .catch(() => notify({ message: "Cannot fetch the updated time block", isError: true }));
             };
+            eventSource.current.onmessage = eventListener.current;
         }
     }, [date]);
 

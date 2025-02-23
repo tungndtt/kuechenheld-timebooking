@@ -1,5 +1,5 @@
 "use client";
-import { useState, memo, useMemo } from "react";
+import React, { useState, memo, useMemo } from "react";
 import { useNotificationContext } from "@/app/context/notification";
 import { useTimeBlockContext } from "@/app/context/timeblock";
 import { useStaffContext } from "@/app/context/staff";
@@ -14,12 +14,19 @@ import {
     InputLabel,
     MenuItem,
     Select,
+    Step,
+    StepIcon,
+    StepIconProps,
+    StepLabel,
+    Stepper,
     Typography,
 } from "@mui/material";
 import { DatePicker, TimeField } from "@mui/x-date-pickers";
 import ErrorIcon from "@mui/icons-material/Error";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
+import EventIcon from "@mui/icons-material/Event";
 import dayjs, { Dayjs } from "dayjs";
+import { getDurationDisplay } from "@/app/utils";
 import { TimeBlock, Duration } from "@/app/types";
 import { SERVER_URL } from "@/app/config";
 
@@ -74,7 +81,7 @@ export default function AdminPage() {
     };
 
     return (
-        <Box sx={{ display: "flex", flexDirection: "column", gap: 2, m: "20px 10px" }}>
+        <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
             <DatePicker
                 label="Appointment Date"
                 value={date}
@@ -142,7 +149,7 @@ export default function AdminPage() {
                 </Button>
             </Box>
             <Divider>
-                <Chip label="Time Blocks" size="small" />
+                <Chip label="Time Blocks" size="small" sx={{ borderRadius: "5px", fontWeight: "bold" }} />
             </Divider>
             {[...timeBlocks.entries()].map(([staffId, staffTimeBlocks]) => (
                 <StaffTimeBlocks key={staffId} name={staffs.get(staffId) ?? "unknown"} timeBlocks={staffTimeBlocks} />
@@ -151,21 +158,36 @@ export default function AdminPage() {
     );
 }
 
+function TimeBlockStepIcon(_: StepIconProps) {
+    return <StepIcon icon={<EventIcon />} />;
+}
+
 const StaffTimeBlocks = memo((props: { name: string; timeBlocks: TimeBlock[] }) => {
     const { name, timeBlocks } = props;
 
     return (
-        <Box>
-            <Typography>{name}</Typography>
-            <Box>
-                {timeBlocks.map(({ id, duration }) => (
-                    <Chip
-                        key={id}
-                        label={`${duration.startHour}:${duration.startMinute} - ${duration.endHour}:${duration.endMinute}`}
-                        variant="filled"
-                    />
-                ))}
-            </Box>
-        </Box>
+        <Card elevation={4}>
+            <CardContent sx={{ display: "flex", flexDirection: "column", p: 2, gap: 1, overflowX: "auto" }}>
+                <Typography variant="body1">
+                    <b>{name}</b>
+                </Typography>
+                <Stepper alternativeLabel sx={{ width: "fit-content" }}>
+                    {timeBlocks.map(({ id, duration }) => (
+                        <Step key={id}>
+                            <StepLabel
+                                slots={{ stepIcon: TimeBlockStepIcon }}
+                                sx={{
+                                    "& .MuiStepLabel-label.MuiStepLabel-alternativeLabel": {
+                                        marginTop: "5px",
+                                    },
+                                }}
+                            >
+                                <Chip label={getDurationDisplay(duration)} sx={{ borderRadius: "10px", fontWeight: "bold" }} />
+                            </StepLabel>
+                        </Step>
+                    ))}
+                </Stepper>
+            </CardContent>
+        </Card>
     );
 });
