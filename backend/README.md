@@ -1,46 +1,38 @@
-## Kuechenheld Coding Challenge
+## Kuechenheld Coding Challenge - Backend
 
-#### Project setup
+#### Manual Run
 
-```bash
-$ npm install
+- Backend uses [mysql](https://www.mysql.com/) to store the application data. Make sure mysql run-to-run. The current implementation works on **mysql 8+**
+- Backend uses [redis](https://www.redis.io/) as pubsub system to synchronize backend instances. Make sure redis run-to-run. The current implementation works on **Redis 7+**
+- Make sure [Node](https://nodejs.org/) installed on your machine. The current implementation works on **Node 20+**
+- Install required dependencies: `npm install`
+- Set the following variables in the environment. You can either set the variable manually or create `.env` file
+
+```.env
+#### .env
+
+# Environment
+NODE_ENV=<running environment. 'dev' or 'prod'>
+
+# Server Configuration
+HOST=<backend host. localhost by default>
+PORT=<backend port. 2204 by default>
+
+# Database Configuration
+DATABASE_HOST=<mysql host. localhost by default>
+DATABASE_PORT=<mysql port. 3306 by default>
+DATABASE_USERNAME=<mysql user account>
+DATABASE_PASSWORD=<mysql password account>
+DATABASE_NAME=<mysql database name>
+
+# Redis Configuration
+REDIS_HOST=<redis host. localhost by default>
+REDIS_PORT=<redis port. 6379 by default>
 ```
 
-#### Compile and run the project
+- Run in development: `npm run start`
+- By default, backend is available on [http://localhost:2204](http://localhost:2204)
 
-```bash
-# development
-$ npm run start
+#### Docker
 
-# watch mode
-$ npm run start:dev
-
-# production mode
-$ npm run start:prod
-```
-
-#### Run tests
-
-```bash
-# unit tests
-$ npm run test
-
-# e2e tests
-$ npm run test:e2e
-
-# test coverage
-$ npm run test:cov
-```
-
-#### Deployment
-
-When you're ready to deploy your NestJS application to production, there are some key steps you can take to ensure it runs as efficiently as possible. Check out the [deployment documentation](https://docs.nestjs.com/deployment) for more information.
-
-If you are looking for a cloud-based platform to deploy your NestJS application, check out [Mau](https://mau.nestjs.com), our official platform for deploying NestJS applications on AWS. Mau makes deployment straightforward and fast, requiring just a few simple steps:
-
-```bash
-$ npm install -g mau
-$ mau deploy
-```
-
-With Mau, you can deploy your application in just a few clicks, allowing you to focus on building features rather than managing infrastructure.
+Checkout [Docker](../README.md#docker) for running the whole application
