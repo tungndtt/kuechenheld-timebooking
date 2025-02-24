@@ -32,7 +32,7 @@ async function bootstrap() {
     const configService = app.get(ConfigService);
     const port = configService.get<number>('PORT', 2204);
     const host = configService.get<string>('HOST', 'localhost');
-    const env = configService.get<string>('ENVIRONMENT', 'dev');
+    const env = configService.get<string>('NODE_ENV', 'dev');
     if(env === 'dev') {
         app.enableCors();
     }
