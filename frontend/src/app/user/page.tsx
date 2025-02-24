@@ -16,7 +16,6 @@ import {
     Card,
     CardContent,
     StepIcon,
-    StepIconProps,
     Stepper,
     Step,
     StepLabel,
@@ -28,18 +27,19 @@ import ErrorOutlineIcon from "@mui/icons-material/ErrorOutline";
 import EventAvailableIcon from "@mui/icons-material/EventAvailable";
 import CircleIcon from "@mui/icons-material/Circle";
 import dayjs, { Dayjs } from "dayjs";
+import { env } from "next-runtime-env";
 import { TimeBlock, Duration } from "@/app/types";
 import { getDuration, getDurationDisplay, getTimeDiff } from "@/app/utils";
-import { SERVER_URL } from "@/app/config";
 
 const durations = [10, 15, 25, 30, 60];
 
 export default function UserPage() {
+    const SERVER_URL = env("NEXT_PUBLIC_SERVER_URL");
     const notify = useNotificationContext();
     const { timeBlocks, date, setDate } = useTimeBlockContext();
     const { staffs } = useStaffContext();
     const [duration, setDuration] = useState(durations[0]);
-    const [bookingTimeBlock, setBookingTimeBlock] = useState<{ id: Number; duration: Duration } | null>(null);
+    const [bookingTimeBlock, setBookingTimeBlock] = useState<{ id: number; duration: Duration } | null>(null);
     const [bookingAppointment, setBookingAppointment] = useState<Duration | null>(null);
     const [bookingOpen, setBookingOpen] = useState(false);
     const onBooking = useCallback(
@@ -81,8 +81,9 @@ export default function UserPage() {
             .then(async (response) => {
                 if (response.ok) {
                     notify({ message: "Booked appointment successfully", isError: false });
+                    setBookingOpen(false);
                 } else {
-                    notify({ message: "Cannot book the appointment", isError: true });
+                    notify({ message: "Cannot book the appointment. There might overlapping", isError: true });
                 }
             })
             .catch(() => notify({ message: "Cannot book the appointment", isError: true }));
@@ -218,69 +219,72 @@ export default function UserPage() {
     );
 }
 
-function AvailableStepIcon(_: StepIconProps) {
+function AvailableStepIcon() {
     return <StepIcon icon={<EventAvailableIcon color="success" />} />;
 }
 
-function BookedStepIcon(_: StepIconProps) {
+function BookedStepIcon() {
     return <StepIcon icon={<CircleIcon color="warning" />} />;
 }
 
-const StaffTimeBlocks = memo(
-    (props: { name: string; timeBlocks: TimeBlock[]; duration: number; onBooking: (id: number, duration: Duration) => void }) => {
-        const { name, timeBlocks, duration, onBooking } = props;
-        const appointments = [] as { id: number; duration: Duration; available: boolean }[];
-        for (const timeBlock of timeBlocks) {
-            const id = timeBlock.id;
-            let { startHour, startMinute } = timeBlock.duration;
-            for (const appointment of timeBlock.appointments) {
-                let { startHour: endHour, startMinute: endMinute } = appointment;
-                if ((endHour - startHour) * 60 + (endMinute - startMinute) >= duration) {
-                    const duration = { startHour, startMinute, endHour, endMinute };
-                    appointments.push({ id, duration, available: true });
-                }
-                startHour = appointment.endHour;
-                startMinute = appointment.endMinute;
-                appointments.push({ id, duration: appointment, available: false });
-            }
-            let { endHour, endMinute } = timeBlock.duration;
+const StaffTimeBlocks = memo(function StaffTimeBlocks(props: {
+    name: string;
+    timeBlocks: TimeBlock[];
+    duration: number;
+    onBooking: (id: number, duration: Duration) => void;
+}) {
+    const { name, timeBlocks, duration, onBooking } = props;
+    const appointments = [] as { id: number; duration: Duration; available: boolean }[];
+    for (const timeBlock of timeBlocks) {
+        const id = timeBlock.id;
+        let { startHour, startMinute } = timeBlock.duration;
+        for (const appointment of timeBlock.appointments) {
+            const { startHour: endHour, startMinute: endMinute } = appointment;
             if ((endHour - startHour) * 60 + (endMinute - startMinute) >= duration) {
                 const duration = { startHour, startMinute, endHour, endMinute };
                 appointments.push({ id, duration, available: true });
             }
+            startHour = appointment.endHour;
+            startMinute = appointment.endMinute;
+            appointments.push({ id, duration: appointment, available: false });
         }
-        return (
-            <Card elevation={4}>
-                <CardContent sx={{ display: "flex", flexDirection: "column", p: 2, gap: 1, overflowX: "auto" }}>
-                    <Typography variant="body1">
-                        <b>{name}</b>
-                    </Typography>
-                    <Stepper alternativeLabel sx={{ width: "fit-content" }}>
-                        {appointments.map(({ id, duration, available }) => {
-                            const label = getDurationDisplay(duration);
-                            return (
-                                <Step key={label}>
-                                    <StepLabel
-                                        slots={{ stepIcon: available ? AvailableStepIcon : BookedStepIcon }}
-                                        sx={{
-                                            "& .MuiStepLabel-label.MuiStepLabel-alternativeLabel": {
-                                                marginTop: "5px",
-                                            },
-                                        }}
-                                    >
-                                        <Chip
-                                            label={label}
-                                            sx={{ borderRadius: "10px", fontWeight: "bold" }}
-                                            onClick={available ? () => onBooking(id, duration) : undefined}
-                                            color={available ? "success" : "warning"}
-                                        />
-                                    </StepLabel>
-                                </Step>
-                            );
-                        })}
-                    </Stepper>
-                </CardContent>
-            </Card>
-        );
+        const { endHour, endMinute } = timeBlock.duration;
+        if ((endHour - startHour) * 60 + (endMinute - startMinute) >= duration) {
+            const duration = { startHour, startMinute, endHour, endMinute };
+            appointments.push({ id, duration, available: true });
+        }
     }
-);
+    return (
+        <Card elevation={4}>
+            <CardContent sx={{ display: "flex", flexDirection: "column", p: 2, gap: 1, overflowX: "auto" }}>
+                <Typography variant="body1">
+                    <b>{name}</b>
+                </Typography>
+                <Stepper alternativeLabel sx={{ width: "fit-content" }}>
+                    {appointments.map(({ id, duration, available }) => {
+                        const label = getDurationDisplay(duration);
+                        return (
+                            <Step key={label}>
+                                <StepLabel
+                                    slots={{ stepIcon: available ? AvailableStepIcon : BookedStepIcon }}
+                                    sx={{
+                                        "& .MuiStepLabel-label.MuiStepLabel-alternativeLabel": {
+                                            marginTop: "5px",
+                                        },
+                                    }}
+                                >
+                                    <Chip
+                                        label={label}
+                                        sx={{ borderRadius: "10px", fontWeight: "bold" }}
+                                        onClick={available ? () => onBooking(id, duration) : undefined}
+                                        color={available ? "success" : "warning"}
+                                    />
+                                </StepLabel>
+                            </Step>
+                        );
+                    })}
+                </Stepper>
+            </CardContent>
+        </Card>
+    );
+});

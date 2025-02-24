@@ -3,8 +3,8 @@ import { ReactNode, createContext, useState, useEffect, useRef, useContext } fro
 import { usePathname } from "next/navigation";
 import { useNotificationContext } from "@/app/context/notification";
 import dayjs, { Dayjs } from "dayjs";
+import { env } from "next-runtime-env";
 import { TimeBlock } from "@/app/types";
-import { SERVER_URL } from "@/app/config";
 
 type TimeBlockContextType = {
     date: Dayjs | null;
@@ -19,9 +19,10 @@ const TimeBlockContext = createContext<TimeBlockContextType>({
 });
 
 export default function TimeBlockProvider(props: { children: ReactNode }) {
+    const SERVER_URL = env("NEXT_PUBLIC_SERVER_URL");
     const notify = useNotificationContext();
     const eventSource = useRef<EventSource | null>(null);
-    const eventListener = useRef<(this: EventSource, ev: MessageEvent) => any | null>(null);
+    const eventListener = useRef<(this: EventSource, ev: MessageEvent) => void | null>(null);
     const pathname = usePathname();
     const [date, setDate] = useState<Dayjs | null>(dayjs());
     const [timeBlocks, setTimeBlocks] = useState<Map<number, TimeBlock[]>>(new Map<number, TimeBlock[]>());
@@ -41,7 +42,7 @@ export default function TimeBlockProvider(props: { children: ReactNode }) {
         if (eventListener.current) {
             eventSource.current.onmessage = eventListener.current;
         }
-        eventSource.current.onerror = function (_) {
+        eventSource.current.onerror = function () {
             close();
             connect();
         };
@@ -60,7 +61,7 @@ export default function TimeBlockProvider(props: { children: ReactNode }) {
                 if (response.ok) {
                     const tbs: TimeBlock[] = await response.json();
                     const timeBlocks = new Map<number, TimeBlock[]>();
-                    for (let tb of tbs) {
+                    for (const tb of tbs) {
                         let timeBlock = timeBlocks.get(tb.staffId);
                         if (!timeBlock) {
                             timeBlock = [];

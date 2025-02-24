@@ -1,5 +1,5 @@
 "use client";
-import { ReactNode, createContext, useContext, useState } from "react";
+import { ReactNode, SyntheticEvent, createContext, useContext, useState } from "react";
 import { Alert, Snackbar } from "@mui/material";
 
 type Notification = {
@@ -12,7 +12,7 @@ const NotificationContext = createContext<(_notification: Notification) => void>
 export default function NotificationProvider(props: { children: ReactNode }) {
     const [notification, setNotification] = useState<Notification | undefined>(undefined);
 
-    const onClose = (_: any, reason?: string) => {
+    const onClose = (_: SyntheticEvent | Event, reason?: string) => {
         if (reason === "clickaway") return;
         setNotification(undefined);
     };

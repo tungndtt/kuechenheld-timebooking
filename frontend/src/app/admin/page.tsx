@@ -16,7 +16,6 @@ import {
     Select,
     Step,
     StepIcon,
-    StepIconProps,
     StepLabel,
     Stepper,
     Typography,
@@ -26,11 +25,12 @@ import ErrorIcon from "@mui/icons-material/Error";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import EventIcon from "@mui/icons-material/Event";
 import dayjs, { Dayjs } from "dayjs";
+import { env } from "next-runtime-env";
 import { getDurationDisplay } from "@/app/utils";
 import { TimeBlock, Duration } from "@/app/types";
-import { SERVER_URL } from "@/app/config";
 
 export default function AdminPage() {
+    const SERVER_URL = env("NEXT_PUBLIC_SERVER_URL");
     const notify = useNotificationContext();
     const { timeBlocks, date, setDate } = useTimeBlockContext();
     const { staffs } = useStaffContext();
@@ -158,11 +158,11 @@ export default function AdminPage() {
     );
 }
 
-function TimeBlockStepIcon(_: StepIconProps) {
+function TimeBlockStepIcon() {
     return <StepIcon icon={<EventIcon />} />;
 }
 
-const StaffTimeBlocks = memo((props: { name: string; timeBlocks: TimeBlock[] }) => {
+const StaffTimeBlocks = memo(function StaffTimeBlocks(props: { name: string; timeBlocks: TimeBlock[] }) {
     const { name, timeBlocks } = props;
 
     return (

@@ -1,10 +1,10 @@
 import { Duration } from "@/app/types";
 
 export const getDuration = (startHour: number, startMinute: number, duration: number): Duration => {
-    let minutes = startMinute + duration;
-    let endMinute = minutes % 60;
-    let hours = Math.floor(minutes / 60);
-    let endHour = startHour + hours;
+    const minutes = startMinute + duration;
+    const endMinute = minutes % 60;
+    const hours = Math.floor(minutes / 60);
+    const endHour = startHour + hours;
     return { startHour, startMinute, endHour, endMinute };
 };
 
