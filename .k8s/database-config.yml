@@ -1,0 +1,9 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+    name: database-config
+data:
+    MYSQL_ROOT_PASSWORD: kuechenheld
+    MYSQL_DATABASE: kuechenheld
+    MYSQL_USER: kuechenheld
+    MYSQL_PASSWORD: kuechenheld

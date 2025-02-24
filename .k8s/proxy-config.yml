@@ -1,0 +1,30 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+    name: proxy-config
+data:
+    nginx.conf: |
+        worker_processes auto;
+
+        events {
+            worker_connections 2048;
+        }
+
+        http {
+            server {
+                listen 8080;
+                
+                location / {
+                    proxy_pass http://frontend-service:3000/;
+                }
+                
+                location /api/ {
+                    proxy_set_header Connection "";
+                    proxy_http_version 1.1;
+                    chunked_transfer_encoding off;
+                    proxy_buffering off;
+                    proxy_cache off;
+                    proxy_pass http://backend-service:2204/;
+                }
+            }
+        }

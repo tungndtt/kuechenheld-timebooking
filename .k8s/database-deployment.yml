@@ -1,0 +1,49 @@
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+    name: kuechenheld-data-pvc
+spec:
+    accessModes:
+        - ReadWriteOnce
+    resources:
+        requests:
+            storage: 1Gi
+---
+apiVersion: v1
+kind: Service
+metadata:
+    name: database-service
+spec:
+    selector:
+        app: database
+    ports:
+        - port: 3306
+          targetPort: 3306
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+    name: database
+spec:
+    replicas: 1
+    selector:
+        matchLabels:
+            app: database
+    template:
+        metadata:
+            labels:
+                app: database
+        spec:
+            containers:
+                - name: mysql
+                  image: mysql:8
+                  envFrom:
+                      - configMapRef:
+                            name: database-config
+                  volumeMounts:
+                      - name: kuechenheld-data-volume
+                        mountPath: /var/lib/mysql
+            volumes:
+                - name: kuechenheld-data-volume
+                  persistentVolumeClaim:
+                      claimName: kuechenheld-data-pvc

@@ -64,3 +64,28 @@ MYSQL_PASSWORD=<mysql password account>
 
 -   Build the service images `docker compose up --build`
 -   Start the application with `docker compose up` and stop with `docker compose down`
+
+#### Kubernetes
+
+The application can run on [Kubernetes](https://kubernetes.io/). For local run, make sure that [minikube](https://kubernetes.io/de/docs/tasks/tools/install-minikube/) installed on your machine
+
+-   The application launches deployments of the frontend and backend. For that, their images need to be built
+
+```sh
+#### from project root
+eval $(minikube docker-env)
+cd backend
+docker build -t kh-challenge_backend:latest .
+cd ../frontend
+docker build -t kh-challenge_frontend:latest .
+```
+
+-   Use [k8s-compose.sh](./k8s-compose.sh) to create the application and [k8s-decompose.sh](./k8s-decompose.sh) to delete the resources
+
+```sh
+./k8s-compose.sh
+```
+
+```sh
+./k8s-decompose.sh
+```

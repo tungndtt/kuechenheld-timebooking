@@ -1,0 +1,21 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+    name: backend-config
+data:
+    # NODE_ENV: dev
+
+    # Server Configuration
+    HOST: 0.0.0.0
+    PORT: "2204"
+
+    # Database Configuration
+    DATABASE_HOST: database-service
+    DATABASE_PORT: "3306"
+    DATABASE_USERNAME: kuechenheld
+    DATABASE_PASSWORD: kuechenheld
+    DATABASE_NAME: kuechenheld
+
+    # Redis Configuration
+    REDIS_HOST: pubsub-service
+    REDIS_PORT: "6379"
