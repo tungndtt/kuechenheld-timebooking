@@ -80,12 +80,12 @@ cd ../frontend
 docker build -t kh-challenge_frontend:latest .
 ```
 
--   Use [k8s-compose.sh](./k8s-compose.sh) to create the application and [k8s-decompose.sh](./k8s-decompose.sh) to delete the resources
+-   Use [k8s-compose.sh](./k8s-compose.sh) to create the application
 
 ```sh
 ./k8s-compose.sh
 ```
-
+- Use [k8s-decompose.sh](./k8s-decompose.sh) to delete the resources
 ```sh
 ./k8s-decompose.sh
 ```
